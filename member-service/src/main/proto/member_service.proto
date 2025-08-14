@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package library;
+
+
+
+// MemberService definition
+service MemberService {
+  rpc ValidateMember(MemberValidationRequest) returns (MemberValidationResponse);
+}
+
+// Request to validate member
+message MemberValidationRequest {
+  string member_id = 1;
+}
+
+message MemberValidationResponse {
+  bool valid = 1;
+  string message = 2; // optional explanation
+}
+
+
+
+

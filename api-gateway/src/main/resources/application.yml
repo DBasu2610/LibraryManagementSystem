@@ -1,0 +1,40 @@
+server:
+  port: 9004
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: auth-service-route
+              uri: http://auth-service:9003
+              predicates:
+                - Path=/auth/**
+              filters:
+                - StripPrefix=1  # Remove the first path element from the request URI, e.g. /auth/login -> is forwarded to -> /login
+
+            - id: book-service-route
+              uri: http://book-service:9000
+              predicates:
+                - Path=/api/book/**
+              filters:
+                - StripPrefix=1  # Remove the first path element from the request URI, e.g. /api/book/1 -> is forwarded to -> book/1
+                - JwtValidation # Custom filter for JWT validation
+
+            - id: member-service-route
+              uri: http://member-service:9001
+              predicates:
+                - Path=/api/member/**
+              filters:
+                - StripPrefix=1  # Remove the first path element from the request URI, e.g. /api/member/1 -> is forwarded to -> member/1
+                - JwtValidation # Custom filter for JWT validation
+
+
+            - id: borrow-service-route
+              uri: http://borrow-service:9002
+              predicates:
+                - Path=/api/borrow/**
+              filters:
+                - StripPrefix=1  # Remove the first path element from the request URI, e.g. /api/member/1 -> is forwarded to -> member/1
+                - JwtValidation # Custom filter for JWT validation

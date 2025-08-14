@@ -1,0 +1,50 @@
+syntax = "proto3";
+option java_multiple_files = true;
+
+package library;
+
+// BookService definition
+service BookService {
+  rpc CheckAvailability(BookAvailabilityRequest) returns (BookAvailabilityResponse);
+  rpc ValidateBook(BookAvailabilityRequest) returns (BookAvailabilityResponse);
+  rpc AddBook(BookEditRequest) returns (BookEditResponse);
+  rpc SubtractBook(BookEditRequest) returns (BookEditResponse);
+}
+
+// MemberService definition
+service MemberService {
+  rpc ValidateMember(MemberValidationRequest) returns (MemberValidationResponse);
+}
+
+// Request to check book availability
+message BookAvailabilityRequest {
+  string book_id = 1;
+}
+
+message BookAvailabilityResponse {
+  bool available = 1;
+  string message = 2; // optional explanation
+}
+
+// Request to validate member
+message MemberValidationRequest {
+  string member_id = 1;
+}
+
+message MemberValidationResponse {
+  bool valid = 1;
+  string message = 2; // optional explanation
+}
+
+message  BookEditRequest {
+  string book_id = 1;
+}
+
+message BookEditResponse {
+  bool success = 1;
+  string message = 2; // optional explanation
+}
+
+
+
+

@@ -1,0 +1,154 @@
+networks:
+  internal:
+    driver: bridge
+
+services:
+  book-db:
+    image: mysql:latest
+    container_name: book-service-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: bookdb
+      MYSQL_PASSWORD: me
+      MYSQL_ROOT_PASSWORD: me
+      MYSQL_USER: me
+    ports:
+      - "3000:3306"
+    volumes:
+      - book_db_data:/var/lib/mysql
+    networks:
+      - internal
+
+
+  auth-db:
+    image: mysql:latest
+    container_name: auth-service-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: authdb
+      MYSQL_PASSWORD: me
+      MYSQL_ROOT_PASSWORD: me
+      MYSQL_USER: me
+
+    ports:
+      - "3003:3306"
+    volumes:
+      - auth_db_data:/var/lib/mysql
+    networks:
+      - internal
+
+
+  member-db:
+    image: mysql:latest
+    container_name: member-service-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: memberdb
+      MYSQL_PASSWORD: me
+      MYSQL_ROOT_PASSWORD: me
+      MYSQL_USER: me
+    ports:
+      - "3001:3306"
+    volumes:
+      - member_db_data:/var/lib/mysql
+    networks:
+      - internal
+
+  borrow-db:
+    image: mysql:latest
+    container_name: borrow-service-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: borrowdb
+      MYSQL_PASSWORD: me
+      MYSQL_ROOT_PASSWORD: me
+      MYSQL_USER: me
+    ports:
+      - "3002:3306"
+    volumes:
+      - borrow_db_data:/var/lib/mysql
+    networks:
+      - internal
+
+
+  book-service:
+    build: ./book-service
+    container_name: book-service
+    depends_on:
+      - book-db
+    environment:
+      SPRING_DATASOURCE_PASSWORD: me
+      SPRING_DATASOURCE_URL: jdbc:mysql://book-service-db:3306/bookdb
+      SPRING_DATASOURCE_USERNAME: me
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+    networks:
+      - internal
+
+
+  member-service:
+    build: ./member-service
+    container_name: member-service
+    depends_on:
+      - member-db
+    environment:
+      SPRING_DATASOURCE_PASSWORD: me
+      SPRING_DATASOURCE_URL: jdbc:mysql://member-service-db:3306/memberdb
+      SPRING_DATASOURCE_USERNAME: me
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+    networks:
+      - internal
+
+  borrow-service:
+    build: ./borrow-service
+    container_name: borrow-service
+    depends_on:
+      - borrow-db
+    environment:
+      BOOK_SERVICE_ADDRESS: book-service
+      BOOK_SERVICE_GRPC_PORT: 4000
+      MEMBER_SERVICE_ADDRESS: member-service
+      MEMBER_SERVICE_GRPC_PORT: 4001
+      SPRING_DATASOURCE_PASSWORD: me
+      SPRING_DATASOURCE_URL: jdbc:mysql://borrow-service-db:3306/borrowdb
+      SPRING_DATASOURCE_USERNAME: me
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+    networks:
+      - internal
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    depends_on:
+      - auth-db
+    environment:
+      JWT_SECRET: YjIyNTQzZDM4YjBlNTJkNzkzY2FiNGUxMDI0YjI3NzhhMWY4NDY5MzZkMmE4MWE2NDcyNzMxYjE3YjQ1MjZiNWNmNjIzMTNjYzQ1OWE3MzM2NzRlMDBlNjc0NmRiYzA5N2NiMzRmNTIxNWUzMjJmMGQ5MTZjMmI5MjRkZGFlMTRiMjM2MzU2OTlkYzA0ZDQ3YTUyMGVmYjg5MjMwM2EzNmM0ZTU5ODg5ZjU1ZGM3NDhkOTMwM2E4NDZiOTE5NWE0
+      SPRING_DATASOURCE_PASSWORD: me
+      SPRING_DATASOURCE_URL: jdbc:mysql://auth-service-db:3306/authdb
+      SPRING_DATASOURCE_USERNAME: me
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+    networks:
+      - internal
+
+
+
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "9004:9004"
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:9003
+    networks:
+      - internal
+
+
+volumes:
+  book_db_data:
+  auth_db_data:
+  member_db_data:
+  borrow_db_data:
